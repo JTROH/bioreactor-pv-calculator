@@ -32,9 +32,10 @@ describe("safe reference vessel", () => {
     expect(r.violated).toEqual([]);
     expect(r.unknown).toEqual([]);
     expect(r.skipped).toEqual([]);
+    expect(r.cautions).toEqual([]);
   });
 
-  test("P/V = 40 W/m³, ok", () => {
+  test("P/V = 40 W/m³, ok (within typical 10–150 band)", () => {
     const c = byId(r.constraints, "pv");
     expect(c.value).toBeCloseTo(40, 6);
     expect(c.status).toBe("ok");
@@ -71,6 +72,37 @@ describe("safe reference vessel", () => {
   });
 });
 
+describe("P/V banding (typical 10–150, caution to 250, alert >250)", () => {
+  // P/V = 5·N³ for this vessel (Np=5, ρ=1000, D=0.1, V=0.01).
+  const atSpeed = (N: number) =>
+    evaluateOperatingPoint({ ...SAFE, impeller: { ...SAFE.impeller, impellerSpeed: N } });
+
+  test("P/V ≈ 200 → caution, window still inside", () => {
+    const r = atSpeed(Math.cbrt(40)); // 5·40 = 200 W/m³
+    const c = byId(r.constraints, "pv");
+    expect(c.value).toBeCloseTo(200, 4);
+    expect(c.status).toBe("caution");
+    expect(r.cautions).toContain("pv");
+    expect(r.window).toBe("inside"); // caution does not push it outside
+  });
+
+  test("P/V ≈ 300 → violated, window outside", () => {
+    const r = atSpeed(Math.cbrt(60)); // 5·60 = 300 W/m³
+    const c = byId(r.constraints, "pv");
+    expect(c.value).toBeCloseTo(300, 4);
+    expect(c.status).toBe("violated");
+    expect(r.window).toBe("outside");
+  });
+
+  test("P/V ≈ 5 (< 10) → low caution", () => {
+    const r = atSpeed(1); // 5·1 = 5 W/m³
+    const c = byId(r.constraints, "pv");
+    expect(c.value).toBeCloseTo(5, 6);
+    expect(c.status).toBe("caution");
+    expect(c.message).toMatch(/below the typical/);
+  });
+});
+
 describe("over-agitated vessel (N = 10 rev/s)", () => {
   const fast: OperatingPoint = {
     ...SAFE,
@@ -82,7 +114,7 @@ describe("over-agitated vessel (N = 10 rev/s)", () => {
     expect(r.window).toBe("outside");
   });
 
-  test("P/V violated (5000 W/m³ > 50)", () => {
+  test("P/V violated (5000 W/m³ > 250)", () => {
     const c = byId(r.constraints, "pv");
     expect(c.value).toBeCloseTo(5000, 2);
     expect(c.status).toBe("violated");

@@ -36,12 +36,24 @@ export interface KLaConstants {
   beta: number;
 }
 
-/** Common Van't Riet (1979) literature presets. */
+/**
+ * kLa correlation presets for kLa = A·(P/V)^α·(vs)^β (SI).
+ *
+ * - coalescing / nonCoalescing: classic Van't Riet (1979) water-based values.
+ * - cellCulture: EXPONENTS from a cell-culture study (Xing et al. 2009, 5,000 L
+ *   industrial bioreactor; P/V exponent 0.47, vs exponent 0.8 — vs dominates in
+ *   cell culture). The coefficient A is not reported there, so the A below is an
+ *   ILLUSTRATIVE calibration chosen to give kLa ≈ 10 1/h at typical cell-culture
+ *   conditions (the magnitude cited by Hu & Wiltberger); calibrate A to your own
+ *   gassing-out data.
+ */
 export const KLA_PRESETS = {
   /** Coalescing systems (pure water-like). */
   coalescing: { A: 0.026, alpha: 0.4, beta: 0.5 },
   /** Non-coalescing systems (salt/protein-containing media). */
   nonCoalescing: { A: 0.002, alpha: 0.7, beta: 0.2 },
+  /** Cell-culture exponents (Xing 2009); A is an illustrative calibration. */
+  cellCulture: { A: 0.075, alpha: 0.47, beta: 0.8 },
 } as const satisfies Record<string, KLaConstants>;
 
 /**

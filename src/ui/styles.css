@@ -383,6 +383,10 @@ legend {
   background: var(--warn-bg);
   color: var(--warn-fg);
 }
+.summary-caution {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+}
 
 /* results table */
 table.results {
@@ -420,6 +424,9 @@ table.results th {
 .row-violated {
   background: rgba(192, 57, 43, 0.04);
 }
+.row-caution {
+  background: rgba(230, 184, 96, 0.05);
+}
 
 /* badges */
 .badge {
@@ -433,6 +440,10 @@ table.results th {
 .badge-ok {
   background: var(--ok-bg);
   color: var(--ok-fg);
+}
+.badge-caution {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
 }
 .badge-violated {
   background: var(--bad-bg);
