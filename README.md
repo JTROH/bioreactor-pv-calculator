@@ -13,6 +13,9 @@ re-checks every constraint there.
 Built with **Bun + TypeScript + React**. The calculation engine is pure and
 fully unit-tested; the UI is a thin layer over it.
 
+**Live app:** https://JTROH.github.io/bioreactor-pv-calculator/ (auto-deployed
+from `main` to GitHub Pages).
+
 ---
 
 ## Quick start
@@ -20,7 +23,8 @@ fully unit-tested; the UI is a thin layer over it.
 ```bash
 bun install        # install dependencies
 bun run dev        # start with hot reload at http://localhost:3000
-bun test           # run the test suite (114 tests)
+bun run build      # produce a static bundle in dist/ (deployed to Pages)
+bun test           # run the test suite
 bun run typecheck  # tsc --noEmit
 ```
 

@@ -150,8 +150,8 @@ function DesignSpaceSVG({
       {/* current operating point */}
       {currentInRange && (
         <g>
-          <circle cx={cx} cy={cy} r={6} fill="#15384a" stroke="#fff" strokeWidth={2} />
-          <text x={cx + 10} y={cy - 8} className="axis-text" fill="#15384a">
+          <circle cx={cx} cy={cy} r={6} fill="#0e1621" stroke="#fff" strokeWidth={2} />
+          <text x={cx + 10} y={cy - 8} className="axis-text" fill="#e6ecf2">
             current
           </text>
         </g>
