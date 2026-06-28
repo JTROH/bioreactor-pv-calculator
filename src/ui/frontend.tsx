@@ -85,19 +85,28 @@ function App() {
             <h1>Power Input per Unit Volume (P/V) Calculator</h1>
             <p>Stirred-tank bioreactor — shear-proof design space for cell culture</p>
           </div>
-          <div className="unit-toggle" role="group" aria-label="Unit system">
-            <button
-              className={system === "SI" ? "active" : ""}
-              onClick={() => switchSystem("SI")}
-            >
-              SI
-            </button>
-            <button
-              className={system === "practical" ? "active" : ""}
-              onClick={() => switchSystem("practical")}
-            >
-              Practical
-            </button>
+          <div className="unit-control">
+            <div className="unit-toggle" role="group" aria-label="Unit system">
+              <button
+                className={system === "SI" ? "active" : ""}
+                onClick={() => switchSystem("SI")}
+                title="SI base units: m, rev/s, m³, kg/m³, Pa·s, W/m³"
+              >
+                SI
+              </button>
+              <button
+                className={system === "practical" ? "active" : ""}
+                onClick={() => switchSystem("practical")}
+                title="Practical bench units: mm, rpm, L, g/L, cP"
+              >
+                Practical
+              </button>
+            </div>
+            <p className="unit-hint">
+              Only how values are entered/displayed — results are identical.
+              <br />
+              <strong>SI</strong>: m, rev/s, m³, Pa·s · <strong>Practical</strong>: mm, rpm, L, cP
+            </p>
           </div>
         </div>
         <nav className="tabs">
