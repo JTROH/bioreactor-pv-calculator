@@ -13,6 +13,8 @@ import {
 } from "../engine/units";
 import type { OperatingPoint } from "../engine/types";
 import type { ScaleCriterion, TargetGeometry } from "../engine/scaleup";
+import { powerInput, powerPerVolume } from "../engine/impeller";
+import type { OxygenBalanceInputs } from "../engine/oxygen";
 
 /** All form fields as raw strings (empty = not provided). */
 export interface FormState {
@@ -254,6 +256,135 @@ export function buildTargetGeometry(state: ScaleFormState, system: UnitSystem): 
     ...(Np !== undefined ? { powerNumber: Np } : {}),
   };
   return { target, errors };
+}
+
+// ---------------------------------------------------------------------------
+// Oxygen-transfer (kLa/OTR) form state.
+//
+// The REFERENCE vessel (single-vessel form) supplies P/V; the OTR tab adds its
+// own gas flow + tank diameter (so it works regardless of the gas toggle) plus
+// the mass-transfer and cell-demand parameters.
+// ---------------------------------------------------------------------------
+
+export interface OtrFormState {
+  gasFlow: string; // Q_gas (for superficial velocity)
+  tankDiameter: string; // D_tank
+  kLaA: string; // correlation A
+  kLaAlpha: string; // correlation α
+  kLaBeta: string; // correlation β
+  saturation: string; // C* (mmol/L)
+  doPercent: string; // DO setpoint, % of saturation
+  specificOUR: string; // qO2 (mmol/(10⁹ cells·h))
+  cellDensity: string; // X (10⁶ cells/mL)
+}
+
+export const OTR_DEFAULTS: Record<UnitSystem, OtrFormState> = {
+  SI: {
+    gasFlow: "0.00006", // m³/s (≈ 3.6 L/min)
+    tankDiameter: "0.2", // m
+    kLaA: "0.026",
+    kLaAlpha: "0.4",
+    kLaBeta: "0.5",
+    saturation: "0.21", // mmol/L (air-saturated, ~37 °C)
+    doPercent: "40",
+    specificOUR: "0.3", // mmol/(10⁹ cells·h)
+    cellDensity: "10", // 10⁶ cells/mL
+  },
+  practical: {
+    gasFlow: "3.6", // L/min
+    tankDiameter: "200", // mm
+    kLaA: "0.026",
+    kLaAlpha: "0.4",
+    kLaBeta: "0.5",
+    saturation: "0.21",
+    doPercent: "40",
+    specificOUR: "0.3",
+    cellDensity: "10",
+  },
+};
+
+export interface BuildOxygenResult {
+  inputs?: OxygenBalanceInputs;
+  /** P/V [W/m³] derived from the reference vessel (for display). */
+  powerPerVolume?: number;
+  errors: string[];
+}
+
+/**
+ * Build OxygenBalanceInputs (SI) from the OTR form plus the reference vessel.
+ * Requires the reference to have a power number (Np) so P/V can be computed.
+ */
+export function buildOxygenInputs(
+  otr: OtrFormState,
+  reference: FormState,
+  system: UnitSystem,
+): BuildOxygenResult {
+  const errors: string[] = [];
+
+  const ref = buildOperatingPoint(reference, system);
+  if (!ref.point) {
+    return { errors: ["Complete the reference vessel (Single Vessel tab) first."] };
+  }
+  const Np = ref.point.impeller.powerNumber;
+  if (Np === undefined) {
+    return { errors: ["Enter the power number (Np) on the Single Vessel tab to compute P/V."] };
+  }
+  const P = powerInput(Np, ref.point.fluid.liquidDensity, ref.point.impeller.impellerSpeed, ref.point.impeller.impellerDiameter);
+  const pv = powerPerVolume(P, ref.point.fluid.workingVolume);
+
+  const Q = si(otr.gasFlow, "gasFlow", system);
+  const Dt = si(otr.tankDiameter, "tankDiameter", system);
+  const A = num(otr.kLaA);
+  const alpha = num(otr.kLaAlpha);
+  const beta = num(otr.kLaBeta);
+  const cStar = si(otr.saturation, "oxygenConc", system);
+  const doPct = num(otr.doPercent);
+  const qO2 = si(otr.specificOUR, "specificOUR", system);
+  const X = si(otr.cellDensity, "cellDensity", system);
+
+  if (Q === undefined || Q < 0) errors.push("Gas flow (Q) is required and must be ≥ 0.");
+  if (Dt === undefined || Dt <= 0) errors.push("Tank diameter is required and must be > 0.");
+  if (A === undefined || A <= 0) errors.push("kLa coefficient A must be > 0.");
+  if (alpha === undefined) errors.push("kLa exponent α is required.");
+  if (beta === undefined) errors.push("kLa exponent β is required.");
+  if (cStar === undefined || cStar <= 0) errors.push("Saturation O₂ (C*) must be > 0.");
+  if (doPct === undefined || doPct < 0 || doPct >= 100)
+    errors.push("DO setpoint must be in [0, 100) %.");
+  if (qO2 === undefined || qO2 < 0) errors.push("Specific OUR (qO2) must be ≥ 0.");
+  if (X === undefined || X < 0) errors.push("Cell density (X) must be ≥ 0.");
+
+  if (errors.length > 0) return { errors, powerPerVolume: pv };
+
+  const inputs: OxygenBalanceInputs = {
+    powerPerVolume: pv,
+    gasFlow: Q!,
+    tankDiameter: Dt!,
+    kLaConstants: { A: A!, alpha: alpha!, beta: beta! },
+    saturation: cStar!,
+    doFraction: doPct! / 100,
+    specificOUR: qO2!,
+    cellDensity: X!,
+  };
+  return { inputs, powerPerVolume: pv, errors };
+}
+
+/** Convert OTR form fields that depend on the unit system (gas flow, tank diameter). */
+export function convertOtrState(
+  state: OtrFormState,
+  from: UnitSystem,
+  to: UnitSystem,
+): OtrFormState {
+  const map: Array<[keyof OtrFormState, Quantity]> = [
+    ["gasFlow", "gasFlow"],
+    ["tankDiameter", "tankDiameter"],
+  ];
+  const next: OtrFormState = { ...state };
+  for (const [key, q] of map) {
+    const n = num(state[key] as string);
+    if (n === undefined) continue;
+    (next[key] as string) = trimNumber(engineToDisplay(displayToEngine(n, q, from), q, to));
+  }
+  return next;
 }
 
 /** Convert scale-up form numeric fields between unit systems. */
