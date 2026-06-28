@@ -8,34 +8,41 @@ import type { EvaluationResult } from "../engine/types";
 import {
   DEFAULTS,
   SCALE_DEFAULTS,
+  OTR_DEFAULTS,
   buildOperatingPoint,
   convertFormState,
   convertScaleState,
+  convertOtrState,
   type FormState,
   type ScaleFormState,
+  type OtrFormState,
 } from "./model";
 import { VesselForm } from "./components/VesselForm";
 import { ResultsPanel } from "./components/ResultsPanel";
 import { ScaleUpPanel } from "./components/ScaleUpPanel";
 import { DesignSpacePanel } from "./components/DesignSpacePanel";
+import { OxygenPanel } from "./components/OxygenPanel";
 
-type Tab = "single" | "scaleup" | "designspace";
+type Tab = "single" | "scaleup" | "designspace" | "oxygen";
 
 function App() {
   const [system, setSystem] = useState<UnitSystem>("SI");
   const [tab, setTab] = useState<Tab>("single");
   const [state, setState] = useState<FormState>(DEFAULTS.SI);
   const [scale, setScale] = useState<ScaleFormState>(SCALE_DEFAULTS.SI);
+  const [otr, setOtr] = useState<OtrFormState>(OTR_DEFAULTS.SI);
 
   const onChange = (patch: Partial<FormState>) => setState((prev) => ({ ...prev, ...patch }));
   const onScaleChange = (patch: Partial<ScaleFormState>) =>
     setScale((prev) => ({ ...prev, ...patch }));
+  const onOtrChange = (patch: Partial<OtrFormState>) => setOtr((prev) => ({ ...prev, ...patch }));
 
   // Switch unit system: convert all populated numeric fields in place.
   const switchSystem = (next: UnitSystem) => {
     if (next === system) return;
     setState((prev) => convertFormState(prev, system, next));
     setScale((prev) => convertScaleState(prev, system, next));
+    setOtr((prev) => convertOtrState(prev, system, next));
     setSystem(next);
   };
 
@@ -85,6 +92,9 @@ function App() {
           >
             Design Space
           </button>
+          <button className={tab === "oxygen" ? "active" : ""} onClick={() => setTab("oxygen")}>
+            Oxygen (kLa/OTR)
+          </button>
         </nav>
       </header>
 
@@ -109,9 +119,13 @@ function App() {
         <main className="container">
           <ScaleUpPanel reference={state} scale={scale} system={system} onChange={onScaleChange} />
         </main>
-      ) : (
+      ) : tab === "designspace" ? (
         <main className="container">
           <DesignSpacePanel reference={state} system={system} />
+        </main>
+      ) : (
+        <main className="container">
+          <OxygenPanel reference={state} otr={otr} system={system} onChange={onOtrChange} />
         </main>
       )}
 

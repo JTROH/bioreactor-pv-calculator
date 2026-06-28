@@ -42,6 +42,11 @@ bun run typecheck  # tsc --noEmit
 - **Design Space** — a 2-D feasibility map of impeller speed (N) vs. working
   volume (V), shading where all shear constraints are simultaneously satisfied,
   with the current operating point marked. Requires `Np`.
+- **Oxygen (kLa/OTR)** — estimates the volumetric mass-transfer coefficient
+  `kLa = A·(P/V)^α·(vs)^β` (tying into the tool's P/V), then checks oxygen supply
+  (OTR_max = kLa·C\*·(1−DO)) against cell demand (OUR = qO₂·X), reporting the
+  margin and the maximum sustainable cell density. Correlation constants are
+  user inputs with Van't Riet (1979) presets (coalescing / non-coalescing).
 - **SI ↔ Practical units** — toggle between SI (m, rev/s, m³, Pa·s) and bench
   units (mm, rpm, L, cP). All populated fields convert live; the engine always
   computes in SI.

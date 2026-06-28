@@ -20,6 +20,11 @@ export type Dimension =
   | "velocity"
   | "power"
   | "powerPerVolume"
+  | "frequency"
+  | "concentration"
+  | "concentrationRate"
+  | "cellDensity"
+  | "specificRate"
   | "dimensionless";
 
 export interface UnitDef {
@@ -76,6 +81,27 @@ export const UNITS = {
   // power per unit volume — SI base: W/m³
   "W/m³": { dim: "powerPerVolume", toSI: 1, label: "W/m³" },
   "W/L": { dim: "powerPerVolume", toSI: 1000, label: "W/L" },
+
+  // mass-transfer coefficient kLa — SI base: 1/s
+  "1/s": { dim: "frequency", toSI: 1, label: "1/s" },
+  "1/h": { dim: "frequency", toSI: 1 / 3600, label: "1/h" },
+
+  // dissolved-oxygen concentration — SI base: mol/m³ (≡ mmol/L numerically)
+  "mol/m³": { dim: "concentration", toSI: 1, label: "mol/m³" },
+  "mmol/L": { dim: "concentration", toSI: 1, label: "mmol/L" },
+
+  // oxygen transfer/uptake rate — SI base: mol/(m³·s)
+  "mol/(m³·s)": { dim: "concentrationRate", toSI: 1, label: "mol/(m³·s)" },
+  "mmol/(L·h)": { dim: "concentrationRate", toSI: 1 / 3600, label: "mmol/(L·h)" },
+
+  // viable cell density — SI base: cells/m³
+  "cells/m³": { dim: "cellDensity", toSI: 1, label: "cells/m³" },
+  "10⁶ cells/mL": { dim: "cellDensity", toSI: 1e12, label: "10⁶ cells/mL" },
+
+  // specific oxygen uptake rate qO2 — SI base: mol/(cell·s)
+  "mol/(cell·s)": { dim: "specificRate", toSI: 1, label: "mol/(cell·s)" },
+  // 1 mmol/(10⁹ cells·h) = 1e-3 mol / (1e9 cells · 3600 s)
+  "mmol/(10⁹ cells·h)": { dim: "specificRate", toSI: 1e-3 / (1e9 * 3600), label: "mmol/(10⁹ cells·h)" },
 
   // dimensionless (Reynolds, power number, ...)
   "": { dim: "dimensionless", toSI: 1, label: "" },
@@ -136,7 +162,13 @@ export type Quantity =
   | "powerPerVolume"
   | "tipSpeed"
   | "eddyLength"
-  | "reynolds";
+  | "reynolds"
+  | "tankDiameter"
+  | "kLa"
+  | "oxygenConc"
+  | "oxygenRate"
+  | "cellDensity"
+  | "specificOUR";
 
 interface QuantityUnits {
   /** SI unit the engine reads/writes for this quantity. */
@@ -158,6 +190,16 @@ export const QUANTITY_UNITS: Record<Quantity, QuantityUnits> = {
   tipSpeed: { engineUnit: "m/s", display: { SI: "m/s", practical: "m/s" } },
   eddyLength: { engineUnit: "m", display: { SI: "µm", practical: "µm" } },
   reynolds: { engineUnit: "", display: { SI: "", practical: "" } },
+  // Tank diameter follows the same length units as the impeller.
+  tankDiameter: { engineUnit: "m", display: { SI: "m", practical: "mm" } },
+  // Oxygen/mass-transfer quantities use bioprocess-conventional units in BOTH
+  // systems (1/h, mmol/L, 10⁶ cells/mL, ...) — these conventions are universal,
+  // so they do not flip with the SI ↔ practical toggle.
+  kLa: { engineUnit: "1/s", display: { SI: "1/h", practical: "1/h" } },
+  oxygenConc: { engineUnit: "mol/m³", display: { SI: "mmol/L", practical: "mmol/L" } },
+  oxygenRate: { engineUnit: "mol/(m³·s)", display: { SI: "mmol/(L·h)", practical: "mmol/(L·h)" } },
+  cellDensity: { engineUnit: "cells/m³", display: { SI: "10⁶ cells/mL", practical: "10⁶ cells/mL" } },
+  specificOUR: { engineUnit: "mol/(cell·s)", display: { SI: "mmol/(10⁹ cells·h)", practical: "mmol/(10⁹ cells·h)" } },
 };
 
 /** Engine (SI) unit for a quantity. */
