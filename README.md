@@ -39,6 +39,9 @@ bun run typecheck  # tsc --noEmit
   speed** constant from a reference vessel to a target geometry, then re-evaluate
   all constraints at the new scale (with warnings for anything that becomes
   binding, or for an invalid scaling regime).
+- **Design Space** — a 2-D feasibility map of impeller speed (N) vs. working
+  volume (V), shading where all shear constraints are simultaneously satisfied,
+  with the current operating point marked. Requires `Np`.
 - **SI ↔ Practical units** — toggle between SI (m, rev/s, m³, Pa·s) and bench
   units (mm, rpm, L, cP). All populated fields convert live; the engine always
   computes in SI.
