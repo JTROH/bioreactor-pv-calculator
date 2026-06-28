@@ -17,8 +17,9 @@ import {
 import { VesselForm } from "./components/VesselForm";
 import { ResultsPanel } from "./components/ResultsPanel";
 import { ScaleUpPanel } from "./components/ScaleUpPanel";
+import { DesignSpacePanel } from "./components/DesignSpacePanel";
 
-type Tab = "single" | "scaleup";
+type Tab = "single" | "scaleup" | "designspace";
 
 function App() {
   const [system, setSystem] = useState<UnitSystem>("SI");
@@ -78,6 +79,12 @@ function App() {
           <button className={tab === "scaleup" ? "active" : ""} onClick={() => setTab("scaleup")}>
             Scale-Up
           </button>
+          <button
+            className={tab === "designspace" ? "active" : ""}
+            onClick={() => setTab("designspace")}
+          >
+            Design Space
+          </button>
         </nav>
       </header>
 
@@ -98,9 +105,13 @@ function App() {
             {result && <ResultsPanel result={result} />}
           </div>
         </main>
-      ) : (
+      ) : tab === "scaleup" ? (
         <main className="container">
           <ScaleUpPanel reference={state} scale={scale} system={system} onChange={onScaleChange} />
+        </main>
+      ) : (
+        <main className="container">
+          <DesignSpacePanel reference={state} system={system} />
         </main>
       )}
 

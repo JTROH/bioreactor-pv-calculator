@@ -123,6 +123,23 @@ table.kv td {
   line-height: 1.4;
 }
 
+/* design-space plot */
+.design-svg {
+  width: 100%;
+  height: auto;
+  margin-top: 8px;
+  shape-rendering: crispEdges;
+}
+.design-svg .axis-text {
+  font-size: 11px;
+  fill: var(--muted);
+}
+.design-svg .axis-label {
+  font-size: 12px;
+  fill: var(--text);
+  font-weight: 600;
+}
+
 .container {
   max-width: 1100px;
   margin: 24px auto;
