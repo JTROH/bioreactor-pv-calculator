@@ -22,20 +22,41 @@ import { ResultsPanel } from "./components/ResultsPanel";
 import { ScaleUpPanel } from "./components/ScaleUpPanel";
 import { DesignSpacePanel } from "./components/DesignSpacePanel";
 import { OxygenPanel } from "./components/OxygenPanel";
+import { PresetsPanel } from "./components/PresetsPanel";
+import { stateFromLocationHash, type AppState } from "./presets";
 
-type Tab = "single" | "scaleup" | "designspace" | "oxygen";
+type Tab = "single" | "scaleup" | "designspace" | "oxygen" | "presets";
+
+/** Initial state — from a share-link hash if present, otherwise defaults. */
+function initialAppState(): AppState {
+  if (typeof window !== "undefined") {
+    const fromHash = stateFromLocationHash(window.location.hash);
+    if (fromHash) return fromHash;
+  }
+  return { system: "SI", form: DEFAULTS.SI, scale: SCALE_DEFAULTS.SI, otr: OTR_DEFAULTS.SI };
+}
 
 function App() {
-  const [system, setSystem] = useState<UnitSystem>("SI");
+  const [initial] = useState<AppState>(initialAppState);
+  const [system, setSystem] = useState<UnitSystem>(initial.system);
   const [tab, setTab] = useState<Tab>("single");
-  const [state, setState] = useState<FormState>(DEFAULTS.SI);
-  const [scale, setScale] = useState<ScaleFormState>(SCALE_DEFAULTS.SI);
-  const [otr, setOtr] = useState<OtrFormState>(OTR_DEFAULTS.SI);
+  const [state, setState] = useState<FormState>(initial.form);
+  const [scale, setScale] = useState<ScaleFormState>(initial.scale);
+  const [otr, setOtr] = useState<OtrFormState>(initial.otr);
 
   const onChange = (patch: Partial<FormState>) => setState((prev) => ({ ...prev, ...patch }));
   const onScaleChange = (patch: Partial<ScaleFormState>) =>
     setScale((prev) => ({ ...prev, ...patch }));
   const onOtrChange = (patch: Partial<OtrFormState>) => setOtr((prev) => ({ ...prev, ...patch }));
+
+  // Apply a complete state (from a loaded/imported/shared preset).
+  const applyAppState = (s: AppState) => {
+    setSystem(s.system);
+    setState(s.form);
+    setScale(s.scale);
+    setOtr(s.otr);
+    setTab("single");
+  };
 
   // Switch unit system: convert all populated numeric fields in place.
   const switchSystem = (next: UnitSystem) => {
@@ -95,6 +116,9 @@ function App() {
           <button className={tab === "oxygen" ? "active" : ""} onClick={() => setTab("oxygen")}>
             Oxygen (kLa/OTR)
           </button>
+          <button className={tab === "presets" ? "active" : ""} onClick={() => setTab("presets")}>
+            Presets
+          </button>
         </nav>
       </header>
 
@@ -123,9 +147,13 @@ function App() {
         <main className="container">
           <DesignSpacePanel reference={state} system={system} />
         </main>
-      ) : (
+      ) : tab === "oxygen" ? (
         <main className="container">
           <OxygenPanel reference={state} otr={otr} system={system} onChange={onOtrChange} />
+        </main>
+      ) : (
+        <main className="container">
+          <PresetsPanel current={{ system, form: state, scale, otr }} onLoad={applyAppState} />
         </main>
       )}
 
