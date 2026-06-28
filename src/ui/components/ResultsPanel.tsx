@@ -25,15 +25,22 @@ function display(c: ConstraintResult): { value: string; unit: string } {
 
 export function ResultsPanel({ result }: { result: EvaluationResult }) {
   const w = WINDOW_TEXT[result.window];
+  // An otherwise-inside point with cautions gets an amber banner.
+  const caution = result.window === "inside" && result.cautions.length > 0;
+  const title = caution ? "Inside the window — with caution" : w.title;
+  const cls = caution ? "summary-caution" : w.cls;
   return (
     <section className="panel">
-      <div className={`summary ${w.cls}`}>
-        <strong>{w.title}</strong>
+      <div className={`summary ${cls}`}>
+        <strong>{title}</strong>
         {result.window === "outside" && result.violated.length > 0 && (
           <span className="summary-detail">Binding: {result.violated.join(", ")}</span>
         )}
         {result.window === "indeterminate" && result.unknown.length > 0 && (
           <span className="summary-detail">Awaiting: {result.unknown.join(", ")}</span>
+        )}
+        {result.cautions.length > 0 && (
+          <span className="summary-detail">Caution: {result.cautions.join(", ")}</span>
         )}
         {result.skipped.length > 0 && (
           <span className="summary-detail">

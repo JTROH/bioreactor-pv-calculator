@@ -68,7 +68,7 @@ satisfies every row.
 
 | Quantity | Formula (SI) | Limit |
 |----------|--------------|-------|
-| Power per volume (P/V) | `Np·ρ·N³·D⁵ / V` | ≤ 50 W/m³ |
+| Power per volume (P/V) | `Np·ρ·N³·D⁵ / V` | typical 10–150 W/m³ (caution to 250, alert above) |
 | Impeller-zone power density | `(f·P)/V_zone`, `f≈0.705` | ≤ 1×10⁵ W/m³ |
 | Impeller Reynolds | `ρ·N·D²/μ` | > 10,000 (validity gate for P/V) |
 | Tip speed | `π·N·D` | < 1.5 m/s |
@@ -119,9 +119,12 @@ build_guidance_pdf.py                    regenerates the guidance PDF
 
 ## Caveats
 
-This tool summarizes a single trade-publication article for engineering
-reference. The **constraint thresholds and parameter values** are taken directly
-from that source. Some **equation forms** are reconstructed from standard
+This tool draws on two sources: the BioProcess International "shear-proof design
+space" article and the textbook chapter *Industrial Cell Culture Process Scale-up
+Strategies and Considerations* (Hu & Wiltberger). Core formulas were cross-checked
+against the latter; the **P/V band (10–150 typical / 250 cap)**, the kLa cell-culture
+preset, and typical Np values come from it. Some thresholds (tip speed, gas-entrance
+velocity, orifice Reynolds, the 20 µm eddy floor) come from the shear-proof article. Some **equation forms** are reconstructed from standard
 stirred-tank correlations because the source presents them as figures — these
 are noted in the guidance PDF. The bubble-wake EDR is taken as an explicit input
 rather than derived (the source does not fully specify it). Validate coefficients

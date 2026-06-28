@@ -6,11 +6,12 @@
 /**
  * Verdict for a single constraint check:
  *  - "ok"        within its safe limit (green)
+ *  - "caution"   acceptable but outside the typical range (amber)
  *  - "violated"  outside its limit (red alert)
  *  - "advisory"  reported value with no hard pass/fail limit (e.g. VVM)
  *  - "unknown"   cannot be evaluated yet (a required input is missing, e.g. Np)
  */
-export type ConstraintStatus = "ok" | "violated" | "advisory" | "unknown";
+export type ConstraintStatus = "ok" | "caution" | "violated" | "advisory" | "unknown";
 
 /** Result of evaluating one engineering quantity against its threshold. */
 export interface ConstraintResult {
@@ -100,6 +101,8 @@ export interface EvaluationResult {
   window: WindowStatus;
   /** ids of violated constraints (when window === "outside"). */
   violated: string[];
+  /** ids of constraints flagged "caution" (acceptable but outside the typical range). */
+  cautions: string[];
   /**
    * ids of CORE constraints that could not be evaluated because a REQUIRED
    * input is missing (e.g. Np). These keep the window "indeterminate".

@@ -8,7 +8,7 @@
 // Pure, SI units. Np is required (the P/V-driven boundary is the whole point);
 // the caller should gate on its presence.
 
-import { evaluateOperatingPoint } from "./constraints";
+import { evaluateOperatingPoint, THRESHOLDS } from "./constraints";
 import type { OperatingPoint, WindowStatus } from "./types";
 
 export interface DesignSpaceOptions {
@@ -58,9 +58,10 @@ export function computeDesignSpace(
   const currentN = base.impeller.impellerSpeed;
   const currentV = base.fluid.workingVolume;
 
-  // Critical speeds at the base volume.
-  const nTip = 1.5 / (Math.PI * D); // tip speed = 1.5 m/s
-  const nPv = Math.cbrt((50 * currentV) / (Np * rho * D ** 5)); // P/V = 50 W/m³
+  // Critical speeds at the base volume (frame the axis around where the binding
+  // limits are reached): tip speed = 1.5 m/s, and P/V at its hard maximum.
+  const nTip = THRESHOLDS.tipSpeedMax / (Math.PI * D);
+  const nPv = Math.cbrt((THRESHOLDS.pvMax * currentV) / (Np * rho * D ** 5));
   const nCrit = Math.min(nTip, nPv);
 
   const nMin = 0;

@@ -3,6 +3,7 @@ import type { ConstraintStatus } from "../../engine/types";
 
 const LABELS: Record<ConstraintStatus, string> = {
   ok: "Within limit",
+  caution: "Caution",
   violated: "Alert",
   advisory: "Info",
   unknown: "Needs input",

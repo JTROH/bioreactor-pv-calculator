@@ -35,8 +35,14 @@ import type {
 
 /** Cell-culture safety thresholds (SI units). */
 export const THRESHOLDS = {
-  /** Average P/V upper guideline [W/m³]. */
-  pvMax: 50,
+  /**
+   * Typical cell-culture P/V band [W/m³] (Hu & Wiltberger, Industrial Cell
+   * Culture Scale-up): 10–150 is the normal range; up to ~250 has been reported
+   * without negative impact, treated here as the caution→alert boundary.
+   */
+  pvTypicalMin: 10,
+  pvTypicalMax: 150,
+  pvMax: 250,
   /** Localized impeller-zone power-density upper bound [W/m³]. */
   localEdrMax: 1e5,
   /** Impeller Reynolds lower bound for valid P/V scaling (fully turbulent). */
@@ -78,6 +84,29 @@ function upperLimit(
     status: ok ? "ok" : "violated",
     message: ok ? undefined : `${label} ${fmt(value)} ${unit} exceeds ${limitText}`,
   };
+}
+
+/**
+ * Banded check for P/V: ok inside the typical range, caution outside it (still
+ * acceptable up to the hard max), violated above the hard max.
+ */
+function powerPerVolumeBand(value: number): ConstraintResult {
+  const { pvTypicalMin: lo, pvTypicalMax: hi, pvMax: max } = THRESHOLDS;
+  let status: ConstraintResult["status"];
+  let message: string | undefined;
+  if (value > max) {
+    status = "violated";
+    message = `P/V ${fmt(value)} W/m³ exceeds ${max} W/m³`;
+  } else if (value > hi) {
+    status = "caution";
+    message = `P/V ${fmt(value)} W/m³ is above the typical ${lo}–${hi} W/m³ range (up to ~${max} W/m³ reported without negative impact)`;
+  } else if (value < lo) {
+    status = "caution";
+    message = `P/V ${fmt(value)} W/m³ is below the typical ${lo}–${hi} W/m³ range — verify mixing is adequate`;
+  } else {
+    status = "ok";
+  }
+  return { id: "pv", label: "Power per volume (P/V)", value, unit: "W/m³", status, message };
 }
 
 function lowerLimit(
@@ -158,9 +187,7 @@ export function evaluateOperatingPoint(point: OperatingPoint): EvaluationResult 
   } else {
     const P = powerInput(Np, rho, N, D);
     const pv = powerPerVolume(P, V);
-    out.push(
-      upperLimit("pv", "Power per volume (P/V)", pv, "W/m³", THRESHOLDS.pvMax, `${THRESHOLDS.pvMax} W/m³`),
-    );
+    out.push(powerPerVolumeBand(pv));
 
     // Local impeller-zone power density (needs V_zone).
     const zoneFraction = impeller.zoneFraction ?? PITCHED_BLADE_ZONE_FRACTION;
@@ -199,7 +226,9 @@ export function evaluateOperatingPoint(point: OperatingPoint): EvaluationResult 
       THRESHOLDS.eddyLengthMin,
       `${THRESHOLDS.eddyLengthMin * 1e6} µm`,
     );
-    eddy.message = (eddy.message ? eddy.message + " " : "") + `(based on ${eddyBasis})`;
+    eddy.message =
+      (eddy.message ? eddy.message + " " : "") +
+      `(based on ${eddyBasis}; the 20 µm limit is conservative — the mechanistic damage onset is ~½–⅔ of cell diameter, cells being 12–25 µm)`;
     out.push(eddy);
   }
 
@@ -259,14 +288,16 @@ export function evaluateOperatingPoint(point: OperatingPoint): EvaluationResult 
   // as "skipped" and does NOT block an "inside" verdict. Only missing REQUIRED
   // inputs (Np → core P/V & microeddy) keep the window "indeterminate".
   const violated = out.filter((c) => c.status === "violated").map((c) => c.id);
+  const cautions = out.filter((c) => c.status === "caution").map((c) => c.id);
   const allUnknown = out.filter((c) => c.status === "unknown").map((c) => c.id);
   const skipped = allUnknown.filter((id) => OPTIONAL_CONSTRAINTS.has(id));
   const blockingUnknown = allUnknown.filter((id) => !OPTIONAL_CONSTRAINTS.has(id));
 
+  // A "caution" does not put the point outside the window — it stays usable.
   let window: WindowStatus;
   if (violated.length > 0) window = "outside";
   else if (blockingUnknown.length > 0) window = "indeterminate";
   else window = "inside";
 
-  return { constraints: out, window, violated, unknown: blockingUnknown, skipped };
+  return { constraints: out, window, violated, cautions, unknown: blockingUnknown, skipped };
 }

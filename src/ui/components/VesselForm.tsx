@@ -30,7 +30,7 @@ export function VesselForm({ state, system, onChange }: Props) {
             onChange={set("powerNumber")}
             required
             placeholder="e.g. 5"
-            help="Bioreactor/impeller-specific — empirical or from the vendor. Required for P/V."
+            help="Bioreactor/impeller-specific — empirical or from the vendor. Required for P/V. Typical: Rushton ~5.0, pitched-blade ~1.3, elephant-ear ~1.7, Lightnin A315 ~0.84, axial high-efficiency ~0.3."
           />
           <NumberField
             label="Impeller diameter (D)"

@@ -30,6 +30,15 @@ describe("volumetricMassTransfer  kLa = A·(P/V)^α·(vs)^β", () => {
     expect(KLA_PRESETS.nonCoalescing).toEqual({ A: 0.002, alpha: 0.7, beta: 0.2 });
   });
 
+  test("cell-culture preset (Xing 2009 exponents) gives kLa ≈ 10 1/h at typical conditions", () => {
+    expect(KLA_PRESETS.cellCulture.alpha).toBe(0.47);
+    expect(KLA_PRESETS.cellCulture.beta).toBe(0.8);
+    // pv=40 W/m³, vs≈1.91e-3 m/s → kLa ≈ 0.00284 1/s ≈ 10.2 1/h
+    const kLa = volumetricMassTransfer(40, 1.90986e-3, KLA_PRESETS.cellCulture);
+    expect(kLa * 3600).toBeGreaterThan(8);
+    expect(kLa * 3600).toBeLessThan(13);
+  });
+
   test("pv=40, vs=1.90986e-3 → kLa ≈ 0.004969 1/s", () => {
     const kLa = volumetricMassTransfer(40, 1.90986e-3, KLA_PRESETS.coalescing);
     const expected = 0.026 * 40 ** 0.4 * (1.90986e-3) ** 0.5;

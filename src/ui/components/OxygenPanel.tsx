@@ -67,6 +67,14 @@ export function OxygenPanel({ reference, otr, system, onChange }: Props) {
             <button type="button" className="preset-btn" onClick={() => applyPreset("nonCoalescing")}>
               Non-coalescing (media)
             </button>
+            <button
+              type="button"
+              className="preset-btn"
+              onClick={() => applyPreset("cellCulture")}
+              title="Exponents from Xing 2009 (5,000 L CHO); coefficient A is illustrative — calibrate to your data"
+            >
+              Cell culture (Xing 2009)
+            </button>
           </div>
           <div className="grid">
             <NumberField label="Coefficient A" system={system} value={otr.kLaA} onChange={set("kLaA")} required unitOverride="" />
