@@ -130,6 +130,70 @@ table.kv td {
   background: rgba(63, 166, 204, 0.18);
   border-color: var(--primary);
 }
+.preset-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.preset-btn.danger {
+  color: var(--bad-fg);
+}
+.preset-btn.danger:hover {
+  background: var(--bad-bg);
+  border-color: var(--bad-fg);
+}
+
+.preset-save-row {
+  display: flex;
+  gap: 8px;
+}
+.preset-save-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.92rem;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.preset-save-row input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.preset-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.preset-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.preset-list li:last-child {
+  border-bottom: none;
+}
+.preset-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.preset-name {
+  font-weight: 600;
+}
+.preset-date {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.preset-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
 
 .app-footer {
   max-width: 1100px;

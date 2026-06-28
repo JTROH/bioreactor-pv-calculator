@@ -51,6 +51,9 @@ bun run typecheck  # tsc --noEmit
   (OTR_max = kLa·C\*·(1−DO)) against cell demand (OUR = qO₂·X), reporting the
   margin and the maximum sustainable cell density. Correlation constants are
   user inputs with Van't Riet (1979) presets (coalescing / non-coalescing).
+- **Presets &amp; sharing** — save the full configuration (all tabs) to the
+  browser, export/import it as a JSON file, or copy a shareable link that
+  reopens the tool with the exact same inputs (state is encoded in the URL).
 - **SI ↔ Practical units** — toggle between SI (m, rev/s, m³, Pa·s) and bench
   units (mm, rpm, L, cP). All populated fields convert live; the engine always
   computes in SI.
