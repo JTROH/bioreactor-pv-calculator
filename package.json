@@ -1,0 +1,22 @@
+{
+  "name": "power-input-calculation-sheet",
+  "version": "0.1.0",
+  "description": "Web-based power input per unit volume (P/V) and shear-constraint calculator for stirred-tank bioreactors (cell culture).",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --hot ./index.ts",
+    "start": "bun ./index.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
