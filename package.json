@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "bun --hot ./index.ts",
     "start": "bun ./index.ts",
+    "build": "rm -rf dist && bun build ./src/ui/index.html --outdir dist --minify",
     "test": "bun test",
     "typecheck": "bunx tsc --noEmit"
   },

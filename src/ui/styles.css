@@ -1,19 +1,22 @@
 :root {
-  --bg: #f4f7f9;
-  --panel: #ffffff;
-  --primary: #1b5e7e;
-  --accent: #2e7d32;
-  --border: #d6dee3;
-  --text: #1f2933;
-  --muted: #607078;
-  --ok-bg: #e6f4ea;
-  --ok-fg: #1e7d34;
-  --bad-bg: #fdecea;
-  --bad-fg: #c0392b;
-  --warn-bg: #fff4e0;
-  --warn-fg: #b9770e;
-  --info-bg: #eceff1;
-  --info-fg: #546069;
+  /* Dark theme */
+  --bg: #0e1621;
+  --panel: #18222e;
+  --input-bg: #0f1a24;
+  --header-bg: #112a39;
+  --primary: #3fa6cc; /* lighter teal for accents on dark */
+  --accent: #5fcf86;
+  --border: #2a3744;
+  --text: #e6ecf2;
+  --muted: #93a1b0;
+  --ok-bg: rgba(95, 207, 134, 0.16);
+  --ok-fg: #84d8a2;
+  --bad-bg: rgba(232, 110, 96, 0.16);
+  --bad-fg: #f0a89f;
+  --warn-bg: rgba(230, 184, 96, 0.16);
+  --warn-fg: #e6c27a;
+  --info-bg: rgba(255, 255, 255, 0.08);
+  --info-fg: #aeb9c4;
 }
 
 * {
@@ -28,9 +31,10 @@ body {
 }
 
 .app-header {
-  background: var(--primary);
+  background: var(--header-bg);
   color: #fff;
   padding: 16px 28px 0;
+  border-bottom: 1px solid var(--border);
 }
 .app-header h1 {
   margin: 0;
@@ -123,7 +127,7 @@ table.kv td {
   cursor: pointer;
 }
 .preset-btn:hover {
-  background: var(--light, #eaf2f5);
+  background: rgba(63, 166, 204, 0.18);
   border-color: var(--primary);
 }
 
@@ -235,11 +239,17 @@ legend {
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 0.92rem;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.field-input input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
 }
 .field-input input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(27, 94, 126, 0.15);
+  box-shadow: 0 0 0 2px rgba(63, 166, 204, 0.25);
 }
 .unit {
   color: var(--muted);
