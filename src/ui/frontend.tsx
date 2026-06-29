@@ -114,7 +114,7 @@ function App() {
             Single Vessel
           </button>
           <button className={tab === "scaleup" ? "active" : ""} onClick={() => setTab("scaleup")}>
-            Scale-Up
+            Scaling
           </button>
           <button
             className={tab === "designspace" ? "active" : ""}

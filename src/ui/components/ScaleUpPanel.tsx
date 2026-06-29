@@ -52,11 +52,11 @@ export function ScaleUpPanel({ reference, scale, system, onChange }: Props) {
   return (
     <>
       <section className="panel">
-        <h2>Scale-up target</h2>
+        <h2>Scaling target</h2>
         <p className="field-help" style={{ marginTop: 0 }}>
           Reference vessel is taken from the <strong>Single Vessel</strong> tab. Choose a target
-          geometry and the criterion to hold constant; the solver finds the target impeller speed
-          and re-checks every constraint at the new scale.
+          geometry (larger or smaller) and the criterion to hold constant; the solver finds the
+          target impeller speed and re-checks every constraint at the new scale.
         </p>
 
         <fieldset>
