@@ -39,10 +39,10 @@ bun run typecheck  # tsc --noEmit
   (VVM, gas-entrance velocity, orifice Reynolds, bubble-wake eddy length), each
   with a pass / fail / advisory / needs-input badge and an overall
   "inside / outside the shear-proof window" summary.
-- **Scale-Up** — solve the target impeller speed that holds **P/V** or **tip
-  speed** constant from a reference vessel to a target geometry, then re-evaluate
-  all constraints at the new scale (with warnings for anything that becomes
-  binding, or for an invalid scaling regime).
+- **Scaling** — solve the target impeller speed that holds **P/V** or **tip
+  speed** constant from a reference vessel to a target geometry (scale-up *or*
+  scale-down), then re-evaluate all constraints at the new scale (with warnings
+  for anything that becomes binding, or for an invalid scaling regime).
 - **Design Space** — a 2-D feasibility map of impeller speed (N) vs. working
   volume (V), shading where all shear constraints are simultaneously satisfied,
   with the current operating point marked. Requires `Np`.
