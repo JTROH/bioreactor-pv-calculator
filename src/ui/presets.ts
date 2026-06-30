@@ -76,6 +76,10 @@ export function parseAppState(raw: unknown): AppState {
   if (scale.criterion !== "pv" && scale.criterion !== "tipSpeed") {
     scale.criterion = "pv";
   }
+  // zoneMode is a string union — keep only valid values.
+  if (form.zoneMode !== "direct" && form.zoneMode !== "bladeWidth") {
+    form.zoneMode = "direct";
+  }
 
   return { system, form, scale, otr };
 }

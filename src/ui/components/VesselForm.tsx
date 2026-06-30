@@ -1,5 +1,12 @@
 import React from "react";
-import type { UnitSystem } from "../../engine/units";
+import {
+  displayToEngine,
+  engineToDisplay,
+  displayUnit,
+  unitLabel,
+  type UnitSystem,
+} from "../../engine/units";
+import { estimateSweptVolume } from "../../engine/impeller";
 import type { FormState } from "../model";
 import { NumberField } from "./NumberField";
 
@@ -9,12 +16,27 @@ interface Props {
   onChange: (patch: Partial<FormState>) => void;
 }
 
+/** Computed V_zone (in the working-volume display unit) from D + blade width. */
+function computedZoneVolumeLabel(state: FormState, system: UnitSystem): string | null {
+  const dNum = Number(state.impellerDiameter);
+  const wNum = Number(state.bladeWidth);
+  if (!Number.isFinite(dNum) || dNum <= 0 || !Number.isFinite(wNum) || wNum <= 0) return null;
+  const dSI = displayToEngine(dNum, "impellerDiameter", system);
+  const wSI = displayToEngine(wNum, "impellerDiameter", system);
+  const vSI = estimateSweptVolume(dSI, wSI);
+  const v = engineToDisplay(vSI, "workingVolume", system);
+  const unit = unitLabel(displayUnit("workingVolume", system));
+  return `${parseFloat(v.toPrecision(4))} ${unit}`;
+}
+
 /** Input form for a single bioreactor operating point. */
 export function VesselForm({ state, system, onChange }: Props) {
   const set =
     (key: keyof FormState) =>
     (v: string) =>
       onChange({ [key]: v } as Partial<FormState>);
+
+  const zoneVolumeLabel = computedZoneVolumeLabel(state, system);
 
   return (
     <section className="panel">
@@ -48,14 +70,57 @@ export function VesselForm({ state, system, onChange }: Props) {
             onChange={set("impellerSpeed")}
             required
           />
-          <NumberField
-            label="Impeller swept volume (V_zone)"
-            quantity="workingVolume"
-            system={system}
-            value={state.zoneVolume}
-            onChange={set("zoneVolume")}
-            help="Optional — enables localized impeller-zone EDR."
-          />
+        </div>
+
+        <div className="zone-block">
+          <div className="zone-head">
+            <span className="field-label">Impeller swept volume (V_zone)</span>
+            <span className="zone-modes">
+              <label className="toggle-inline">
+                <input
+                  type="radio"
+                  name="zoneMode"
+                  checked={state.zoneMode === "direct"}
+                  onChange={() => onChange({ zoneMode: "direct" })}
+                />
+                Enter directly
+              </label>
+              <label className="toggle-inline">
+                <input
+                  type="radio"
+                  name="zoneMode"
+                  checked={state.zoneMode === "bladeWidth"}
+                  onChange={() => onChange({ zoneMode: "bladeWidth" })}
+                />
+                From blade width
+              </label>
+            </span>
+          </div>
+          <div className="grid">
+            {state.zoneMode === "direct" ? (
+              <NumberField
+                label="V_zone"
+                quantity="workingVolume"
+                system={system}
+                value={state.zoneVolume}
+                onChange={set("zoneVolume")}
+                help="Optional — enables localized impeller-zone EDR."
+              />
+            ) : (
+              <NumberField
+                label="Blade width / height (w)"
+                quantity="impellerDiameter"
+                system={system}
+                value={state.bladeWidth}
+                onChange={set("bladeWidth")}
+                help={
+                  zoneVolumeLabel
+                    ? `V_zone = (π/4)·D²·w = ${zoneVolumeLabel}`
+                    : "Optional — V_zone = (π/4)·D²·w (needs D and w)."
+                }
+              />
+            )}
+          </div>
         </div>
       </fieldset>
 

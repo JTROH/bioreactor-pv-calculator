@@ -13,7 +13,7 @@ import {
 } from "../engine/units";
 import type { OperatingPoint } from "../engine/types";
 import type { ScaleCriterion, TargetGeometry } from "../engine/scaleup";
-import { powerInput, powerPerVolume } from "../engine/impeller";
+import { powerInput, powerPerVolume, estimateSweptVolume } from "../engine/impeller";
 import type { OxygenBalanceInputs } from "../engine/oxygen";
 
 /** All form fields as raw strings (empty = not provided). */
@@ -22,7 +22,11 @@ export interface FormState {
   powerNumber: string; // Np — REQUIRED for power-derived metrics; no default
   impellerDiameter: string;
   impellerSpeed: string;
-  zoneVolume: string; // optional
+  // Impeller swept volume (V_zone): either entered directly, or computed from
+  // blade width via V_zone = (π/4)·D²·w.
+  zoneMode: "direct" | "bladeWidth";
+  zoneVolume: string; // optional (direct mode)
+  bladeWidth: string; // optional (bladeWidth mode)
   // fluid
   workingVolume: string;
   liquidDensity: string;
@@ -48,7 +52,9 @@ export const DEFAULTS: Record<UnitSystem, FormState> = {
     powerNumber: "",
     impellerDiameter: "0.1", // m
     impellerSpeed: "2", // rev/s
+    zoneMode: "direct",
     zoneVolume: "", // m³ (optional)
+    bladeWidth: "", // m (optional)
     workingVolume: "0.01", // m³
     liquidDensity: "1000", // kg/m³
     liquidViscosity: "0.001", // Pa·s
@@ -64,7 +70,9 @@ export const DEFAULTS: Record<UnitSystem, FormState> = {
     powerNumber: "",
     impellerDiameter: "100", // mm
     impellerSpeed: "120", // rpm
+    zoneMode: "direct",
     zoneVolume: "", // L (optional)
+    bladeWidth: "", // mm (optional)
     workingVolume: "10", // L
     liquidDensity: "1000", // g/L
     liquidViscosity: "1", // cP
@@ -120,7 +128,19 @@ export function buildOperatingPoint(state: FormState, system: UnitSystem): Build
   if (state.powerNumber.trim() !== "" && (Np === undefined || Np < 0)) {
     errors.push("Power number (Np) must be a non-negative number.");
   }
-  const zoneVolume = si(state.zoneVolume, "workingVolume", system);
+  // Impeller swept volume: direct entry, or computed from blade width.
+  let zoneVolume: number | undefined;
+  if (state.zoneMode === "bladeWidth") {
+    const w = si(state.bladeWidth, "impellerDiameter", system); // length
+    if (w !== undefined && w > 0 && D !== undefined && D > 0) {
+      zoneVolume = estimateSweptVolume(D, w); // (π/4)·D²·w
+    }
+    if (state.bladeWidth.trim() !== "" && (w === undefined || w <= 0)) {
+      errors.push("Blade width must be a positive number.");
+    }
+  } else {
+    zoneVolume = si(state.zoneVolume, "workingVolume", system);
+  }
 
   // Gas section (only when enabled).
   let gas: OperatingPoint["gas"];
@@ -183,6 +203,7 @@ export function convertFormState(
     ["impellerDiameter", "impellerDiameter"],
     ["impellerSpeed", "impellerSpeed"],
     ["zoneVolume", "workingVolume"],
+    ["bladeWidth", "impellerDiameter"],
     ["workingVolume", "workingVolume"],
     ["liquidDensity", "liquidDensity"],
     ["liquidViscosity", "liquidViscosity"],

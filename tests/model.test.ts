@@ -49,6 +49,47 @@ describe("buildOperatingPoint", () => {
     expect(errors.some((e) => /diameter/i.test(e))).toBe(true);
   });
 
+  test("V_zone computed from blade width: (π/4)·D²·w", () => {
+    // D = 0.1 m, w = 0.02 m → V_zone = (π/4)·0.01·0.02 = 1.5708e-4 m³
+    const state = {
+      ...DEFAULTS.SI,
+      powerNumber: "5",
+      zoneMode: "bladeWidth" as const,
+      bladeWidth: "0.02",
+    };
+    const { point } = buildOperatingPoint(state, "SI");
+    expect(point!.impeller.zoneVolume).toBeCloseTo((Math.PI / 4) * 0.1 ** 2 * 0.02, 9);
+  });
+
+  test("blade-width mode matches across unit systems", () => {
+    const si = buildOperatingPoint(
+      { ...DEFAULTS.SI, zoneMode: "bladeWidth", bladeWidth: "0.02" },
+      "SI",
+    ).point!;
+    const pr = buildOperatingPoint(
+      { ...DEFAULTS.practical, zoneMode: "bladeWidth", bladeWidth: "20" }, // 20 mm
+      "practical",
+    ).point!;
+    expect(pr.impeller.zoneVolume).toBeCloseTo(si.impeller.zoneVolume!, 9);
+  });
+
+  test("blade-width mode with blank width → no zoneVolume (no error)", () => {
+    const { point, errors } = buildOperatingPoint(
+      { ...DEFAULTS.SI, zoneMode: "bladeWidth", bladeWidth: "" },
+      "SI",
+    );
+    expect(errors).toEqual([]);
+    expect(point!.impeller.zoneVolume).toBeUndefined();
+  });
+
+  test("invalid blade width is rejected", () => {
+    const { errors } = buildOperatingPoint(
+      { ...DEFAULTS.SI, zoneMode: "bladeWidth", bladeWidth: "-3" },
+      "SI",
+    );
+    expect(errors.some((e) => /blade width/i.test(e))).toBe(true);
+  });
+
   test("gas section only included when enabled", () => {
     const off = buildOperatingPoint(DEFAULTS.SI, "SI").point!;
     expect(off.gas).toBeUndefined();
