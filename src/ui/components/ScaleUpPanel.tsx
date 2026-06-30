@@ -117,7 +117,7 @@ export function ScaleUpPanel({ reference, scale, system, onChange }: Props) {
 
       {"error" in computed && computed.error && (
         <section className="panel errors">
-          <strong>Cannot scale up yet:</strong>
+          <strong>Cannot scale yet:</strong>
           <p style={{ margin: "6px 0 0", fontSize: "0.86rem" }}>{computed.error}</p>
         </section>
       )}
