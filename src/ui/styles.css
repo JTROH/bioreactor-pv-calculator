@@ -322,6 +322,143 @@ table.kv td {
   }
 }
 
+/* guide layout: [guide | main] */
+.guide-layout {
+  max-width: 1340px;
+  margin: 24px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.guide-layout.collapsed {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+.guide-main {
+  min-width: 0;
+}
+@media (max-width: 1024px) {
+  .guide-layout,
+  .guide-layout.collapsed {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* guide panel */
+.guide-panel {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+.guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.guide-header h2 {
+  margin: 0;
+}
+.guide-hide {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 0.74rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.guide-hide:hover {
+  color: var(--text);
+  border-color: var(--primary);
+}
+.guide-intro {
+  margin: 8px 0 12px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.guide-list {
+  margin: 0;
+}
+.guide-entry {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+.guide-entry dt {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.guide-entry dd {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.guide-entry dd p {
+  margin: 0 0 5px;
+}
+.guide-tag {
+  display: inline-block;
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-right: 4px;
+}
+
+/* collapsed toggle button */
+.guide-collapsed {
+  align-self: start;
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 8px;
+  cursor: pointer;
+  color: var(--muted);
+}
+.guide-collapsed:hover {
+  border-color: var(--primary);
+  color: var(--text);
+}
+.guide-collapsed-icon {
+  font-size: 1.1rem;
+}
+.guide-collapsed-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+@media (max-width: 1024px) {
+  .guide-panel {
+    position: static;
+    max-height: none;
+  }
+  .guide-collapsed {
+    position: static;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+  }
+  .guide-collapsed-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);
