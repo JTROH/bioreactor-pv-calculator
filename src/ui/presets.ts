@@ -14,7 +14,7 @@ import {
   type ScaleFormState,
   type OtrFormState,
 } from "./model";
-import type { UnitSystem } from "../engine/units";
+import { displayUnit, unitLabel, type Quantity, type UnitSystem } from "../engine/units";
 
 /** Everything needed to fully restore the UI. */
 export interface AppState {
@@ -115,6 +115,79 @@ export function parsePresetText(text: string): ParseResult {
     "state" in obj || "form" in obj || "version" in obj || obj.app === APP_ID;
   if (!looksLikePreset) return { error: "Unrecognized preset file." };
   return { state: parseAppState(raw) };
+}
+
+// --- CSV export -------------------------------------------------------------
+
+/** Quote a CSV field if it contains a comma, quote, or newline. */
+function csvField(value: string): string {
+  return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+/** Display unit label for a quantity in the given system ("" for none). */
+function unitFor(q: Quantity | undefined, system: UnitSystem): string {
+  return q ? unitLabel(displayUnit(q, system)) : "";
+}
+
+/**
+ * Flatten an AppState into a spreadsheet-friendly CSV: one row per parameter,
+ * with columns Section, Parameter, Value, Unit. Values are in the state's own
+ * display units. Line endings are CRLF (Excel-friendly); the caller should
+ * prepend a UTF-8 BOM so units like µ/³ render.
+ */
+export function stateToCsv(state: AppState): string {
+  const sys = state.system;
+  const rows: string[][] = [["Section", "Parameter", "Value", "Unit"]];
+  const add = (section: string, param: string, value: string, unit = ""): void => {
+    rows.push([section, param, value, unit]);
+  };
+
+  add("Meta", "Application", APP_ID);
+  add("Meta", "Exported (UTC)", new Date().toISOString());
+  add("Meta", "Unit system", sys === "practical" ? "Practical" : "SI");
+
+  const f = state.form;
+  add("Vessel", "Power number (Np)", f.powerNumber);
+  add("Vessel", "Impeller diameter (D)", f.impellerDiameter, unitFor("impellerDiameter", sys));
+  add("Vessel", "Impeller speed (N)", f.impellerSpeed, unitFor("impellerSpeed", sys));
+  add("Vessel", "V_zone input mode", f.zoneMode === "bladeWidth" ? "From blade width" : "Direct");
+  if (f.zoneMode === "bladeWidth") {
+    add("Vessel", "Blade width (w)", f.bladeWidth, unitFor("impellerDiameter", sys));
+  } else {
+    add("Vessel", "Impeller swept volume (V_zone)", f.zoneVolume, unitFor("workingVolume", sys));
+  }
+  add("Vessel", "Working volume (V)", f.workingVolume, unitFor("workingVolume", sys));
+  add("Vessel", "Liquid density (rho)", f.liquidDensity, unitFor("liquidDensity", sys));
+  add("Vessel", "Liquid viscosity (mu)", f.liquidViscosity, unitFor("liquidViscosity", sys));
+  add("Vessel", "Gas / sparging enabled", f.gasEnabled ? "yes" : "no");
+  if (f.gasEnabled) {
+    add("Vessel", "Gas flow (Q)", f.gasFlow, unitFor("gasFlow", sys));
+    add("Vessel", "Sparger hole count", f.holeCount);
+    add("Vessel", "Sparger hole diameter", f.holeDiameter, unitFor("holeDiameter", sys));
+    add("Vessel", "Gas density", f.gasDensity, unitFor("liquidDensity", sys));
+    add("Vessel", "Gas viscosity", f.gasViscosity, unitFor("liquidViscosity", sys));
+    add("Vessel", "Bubble-wake EDR (eps_wake)", f.wakeEdr, "m2/s3");
+  }
+
+  const s = state.scale;
+  add("Scaling", "Criterion", s.criterion === "pv" ? "Hold P/V" : "Hold tip speed");
+  add("Scaling", "Target diameter (D2)", s.targetDiameter, unitFor("impellerDiameter", sys));
+  add("Scaling", "Target working volume (V2)", s.targetVolume, unitFor("workingVolume", sys));
+  add("Scaling", "Target swept volume (V_zone)", s.targetZoneVolume, unitFor("workingVolume", sys));
+  add("Scaling", "Target Np override", s.targetPowerNumber);
+
+  const o = state.otr;
+  add("Oxygen", "Gas flow (Q)", o.gasFlow, unitFor("gasFlow", sys));
+  add("Oxygen", "Tank diameter (D_tank)", o.tankDiameter, unitFor("tankDiameter", sys));
+  add("Oxygen", "kLa coefficient A", o.kLaA);
+  add("Oxygen", "kLa exponent alpha (P/V)", o.kLaAlpha);
+  add("Oxygen", "kLa exponent beta (vs)", o.kLaBeta);
+  add("Oxygen", "Saturation O2 (C*)", o.saturation, unitFor("oxygenConc", sys));
+  add("Oxygen", "DO setpoint", o.doPercent, "%");
+  add("Oxygen", "Specific OUR (qO2)", o.specificOUR, unitFor("specificOUR", sys));
+  add("Oxygen", "Viable cell density (X)", o.cellDensity, unitFor("cellDensity", sys));
+
+  return rows.map((r) => r.map(csvField).join(",")).join("\r\n");
 }
 
 // --- shareable URL hash -----------------------------------------------------
