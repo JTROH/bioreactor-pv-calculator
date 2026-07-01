@@ -33,7 +33,12 @@ function initialAppState(): AppState {
     const fromHash = stateFromLocationHash(window.location.hash);
     if (fromHash) return fromHash;
   }
-  return { system: "SI", form: DEFAULTS.SI, scale: SCALE_DEFAULTS.SI, otr: OTR_DEFAULTS.SI };
+  return {
+    system: "practical",
+    form: DEFAULTS.practical,
+    scale: SCALE_DEFAULTS.practical,
+    otr: OTR_DEFAULTS.practical,
+  };
 }
 
 function App() {
