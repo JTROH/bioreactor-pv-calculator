@@ -1,23 +1,23 @@
 :root {
-  /* Light indigo / lavender theme (palette: 3D52A0 7091E6 8697C4 ADBBDA EDE8F5) */
-  --bg: #ede8f5; /* light lavender page background */
-  --panel: #ffffff; /* cards */
-  --input-bg: #ffffff;
-  --header-bg: #3d52a0; /* dark indigo header bar */
-  --primary: #3d52a0; /* indigo — headings, active states, primary accent */
-  --primary-2: #7091e6; /* periwinkle — links, focus, secondary */
-  --accent: #3d52a0;
-  --border: #cdd5ea; /* light indigo-grey */
-  --text: #20264a; /* dark navy body text */
-  --muted: #6b7396; /* muted slate-indigo */
-  --ok-bg: #e6f4ea;
-  --ok-fg: #1e7d34;
-  --bad-bg: #fdecea;
-  --bad-fg: #c0392b;
-  --warn-bg: #fff3df;
-  --warn-fg: #9a6206;
-  --info-bg: #eef0f7;
-  --info-fg: #55607a;
+  /* Dark turquoise / sage theme (palette: 2B4242 6B8784 7D8F8B 93A4AB C3C6C3) */
+  --bg: #1a2827; /* dark teal page background */
+  --panel: #24393a; /* teal card */
+  --input-bg: #172423; /* darker input */
+  --header-bg: #2b4242; /* palette dark teal — header bar */
+  --primary: #86ada5; /* turquoise — headings, active states, accent */
+  --primary-2: #93a4ab; /* light blue-grey — secondary */
+  --accent: #6b8784; /* muted teal — secondary accents */
+  --border: #34504e; /* teal-grey */
+  --text: #e4ecea; /* near-white, slight teal tint */
+  --muted: #93a4ab; /* light blue-grey muted text */
+  --ok-bg: rgba(95, 207, 134, 0.16);
+  --ok-fg: #84d8a2;
+  --bad-bg: rgba(232, 110, 96, 0.16);
+  --bad-fg: #f0a89f;
+  --warn-bg: rgba(230, 184, 96, 0.16);
+  --warn-fg: #e6c27a;
+  --info-bg: rgba(255, 255, 255, 0.08);
+  --info-fg: #aeb9c4;
 }
 
 * {
@@ -115,7 +115,7 @@ body {
 }
 .unit-toggle button.active {
   background: #fff;
-  color: var(--primary);
+  color: var(--header-bg);
   font-weight: 600;
 }
 
@@ -193,7 +193,7 @@ table.kv td {
   cursor: pointer;
 }
 .preset-btn:hover {
-  background: rgba(61, 82, 160, 0.1);
+  background: rgba(134, 173, 165, 0.12);
   border-color: var(--primary);
 }
 .preset-btn:disabled {
@@ -388,7 +388,7 @@ legend {
 .field-input input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(61, 82, 160, 0.2);
+  box-shadow: 0 0 0 2px rgba(134, 173, 165, 0.3);
 }
 .unit {
   color: var(--muted);
