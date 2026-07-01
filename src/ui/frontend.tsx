@@ -23,6 +23,8 @@ import { ScaleUpPanel } from "./components/ScaleUpPanel";
 import { DesignSpacePanel } from "./components/DesignSpacePanel";
 import { OxygenPanel } from "./components/OxygenPanel";
 import { PresetsPanel } from "./components/PresetsPanel";
+import { GuidePanel } from "./components/GuidePanel";
+import { SINGLE_GUIDE, SCALING_GUIDE, OXYGEN_GUIDE } from "./guideContent";
 import { stateFromLocationHash, type AppState } from "./presets";
 
 type Tab = "single" | "scaleup" | "designspace" | "oxygen" | "presets";
@@ -48,6 +50,8 @@ function App() {
   const [state, setState] = useState<FormState>(initial.form);
   const [scale, setScale] = useState<ScaleFormState>(initial.scale);
   const [otr, setOtr] = useState<OtrFormState>(initial.otr);
+  const [guideOpen, setGuideOpen] = useState(true);
+  const toggleGuide = () => setGuideOpen((v) => !v);
 
   const onChange = (patch: Partial<FormState>) => setState((prev) => ({ ...prev, ...patch }));
   const onScaleChange = (patch: Partial<ScaleFormState>) =>
@@ -137,33 +141,42 @@ function App() {
       </header>
 
       {tab === "single" ? (
-        <main className="container two-col">
-          <VesselForm state={state} system={system} onChange={onChange} />
-          <div>
-            {errors.length > 0 && (
-              <section className="panel errors">
-                <strong>Complete the required inputs:</strong>
-                <ul>
-                  {errors.map((e, i) => (
-                    <li key={i}>{e}</li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            {result && <ResultsPanel result={result} />}
+        <main className={`guide-layout${guideOpen ? "" : " collapsed"}`}>
+          <GuidePanel section={SINGLE_GUIDE} open={guideOpen} onToggle={toggleGuide} />
+          <div className="guide-main two-col">
+            <VesselForm state={state} system={system} onChange={onChange} />
+            <div>
+              {errors.length > 0 && (
+                <section className="panel errors">
+                  <strong>Complete the required inputs:</strong>
+                  <ul>
+                    {errors.map((e, i) => (
+                      <li key={i}>{e}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+              {result && <ResultsPanel result={result} />}
+            </div>
           </div>
         </main>
       ) : tab === "scaleup" ? (
-        <main className="container">
-          <ScaleUpPanel reference={state} scale={scale} system={system} onChange={onScaleChange} />
+        <main className={`guide-layout${guideOpen ? "" : " collapsed"}`}>
+          <GuidePanel section={SCALING_GUIDE} open={guideOpen} onToggle={toggleGuide} />
+          <div className="guide-main">
+            <ScaleUpPanel reference={state} scale={scale} system={system} onChange={onScaleChange} />
+          </div>
         </main>
       ) : tab === "designspace" ? (
         <main className="container">
           <DesignSpacePanel reference={state} system={system} />
         </main>
       ) : tab === "oxygen" ? (
-        <main className="container">
-          <OxygenPanel reference={state} otr={otr} system={system} onChange={onOtrChange} />
+        <main className={`guide-layout${guideOpen ? "" : " collapsed"}`}>
+          <GuidePanel section={OXYGEN_GUIDE} open={guideOpen} onToggle={toggleGuide} />
+          <div className="guide-main">
+            <OxygenPanel reference={state} otr={otr} system={system} onChange={onOtrChange} />
+          </div>
         </main>
       ) : (
         <main className="container">
