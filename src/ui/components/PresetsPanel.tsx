@@ -7,6 +7,7 @@ import {
   parsePresetText,
   savePreset,
   serializePreset,
+  stateToCsv,
   shareableUrl,
 } from "../presets";
 import type { AppState, PresetSummary } from "../presets";
@@ -68,15 +69,24 @@ export function PresetsPanel({ current, onLoad }: Props) {
     flash({ kind: "ok", text: `Deleted "${presetName}".` });
   };
 
-  const handleExport = () => {
-    const blob = new Blob([serializePreset(current)], { type: "application/json" });
+  const download = (content: string, mime: string, filename: string) => {
+    const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `pv-preset-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const today = () => new Date().toISOString().slice(0, 10);
+
+  const handleExport = () =>
+    download(serializePreset(current), "application/json", `pv-preset-${today()}.json`);
+
+  const handleExportCsv = () =>
+    // Prepend a UTF-8 BOM so Excel renders unit characters (µ, ³, …) correctly.
+    download("\uFEFF" + stateToCsv(current), "text/csv;charset=utf-8", `pv-config-${today()}.csv`);
 
   const handleImportFile = (file: File) => {
     const reader = new FileReader();
@@ -108,8 +118,9 @@ export function PresetsPanel({ current, onLoad }: Props) {
     <section className="panel">
       <h2>Presets &amp; sharing</h2>
       <p className="field-help" style={{ marginTop: 0 }}>
-        Save the current inputs (all tabs) to this browser, export them as a file, or copy a link
-        that reopens the tool with these exact values.
+        Save the current inputs (all tabs) to this browser, export them as a JSON or CSV file, or
+        copy a link that reopens the tool with these exact values. (JSON re-imports here; CSV is a
+        spreadsheet-friendly record.)
       </p>
 
       {notice && (
@@ -164,6 +175,7 @@ export function PresetsPanel({ current, onLoad }: Props) {
         <legend>File &amp; link</legend>
         <div className="radio-row">
           <button className="preset-btn" onClick={handleExport}>Export JSON</button>
+          <button className="preset-btn" onClick={handleExportCsv}>Export CSV</button>
           <button className="preset-btn" onClick={() => fileRef.current?.click()}>Import JSON</button>
           <button className="preset-btn" onClick={handleShare}>Copy shareable link</button>
           <input

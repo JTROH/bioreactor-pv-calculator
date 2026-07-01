@@ -2,6 +2,7 @@ import { test, expect, describe } from "bun:test";
 import {
   parseAppState,
   serializePreset,
+  stateToCsv,
   parsePresetText,
   encodeStateToHash,
   decodeHashToState,
@@ -93,6 +94,46 @@ describe("parsePresetText guards", () => {
   });
   test("accepts a file with a state key", () => {
     expect(parsePresetText('{"state":{"system":"SI"}}').state).toBeDefined();
+  });
+});
+
+describe("stateToCsv", () => {
+  const rows = (csv: string) => csv.split("\r\n").map((r) => r.split(","));
+
+  test("has the Section/Parameter/Value/Unit header and CRLF lines", () => {
+    const csv = stateToCsv(sample());
+    expect(csv.split("\r\n")[0]).toBe("Section,Parameter,Value,Unit");
+    expect(csv.includes("\r\n")).toBe(true);
+  });
+
+  test("includes key parameters with their values", () => {
+    const csv = stateToCsv(sample()); // practical system, Np=5, N=150
+    expect(csv).toContain("Vessel,Power number (Np),5,");
+    expect(csv).toMatch(/Vessel,Impeller speed \(N\),150,rpm/);
+    expect(csv).toContain("Meta,Unit system,Practical");
+  });
+
+  test("units follow the state's unit system", () => {
+    const si = stateToCsv({ ...sample(), system: "SI" });
+    expect(si).toMatch(/Impeller diameter \(D\),[^,]*,m(\r|$)/m);
+    const pr = stateToCsv(sample()); // practical
+    expect(pr).toMatch(/Impeller diameter \(D\),[^,]*,mm/);
+  });
+
+  test("covers all three sections", () => {
+    const csv = stateToCsv(sample());
+    const sections = new Set(rows(csv).slice(1).map((r) => r[0]));
+    expect(sections.has("Vessel")).toBe(true);
+    expect(sections.has("Scaling")).toBe(true);
+    expect(sections.has("Oxygen")).toBe(true);
+  });
+
+  test("quotes fields containing commas", () => {
+    // A viscosity value like "1,5" (comma decimal) must be quoted so columns stay intact.
+    const s = sample();
+    s.form.liquidViscosity = "1,5";
+    const line = stateToCsv(s).split("\r\n").find((l) => l.includes("Liquid viscosity"))!;
+    expect(line).toContain('"1,5"');
   });
 });
 
