@@ -167,10 +167,18 @@ function App() {
       )}
 
       <footer className="app-footer">
-        Engineering reference only. Thresholds from BioProcess International
-        (Muralidharan, 2023); some equation forms reconstructed from standard
-        stirred-tank correlations. Validate against primary literature and process
-        data before GMP use.
+        <p className="footer-privacy">
+          🔒 <strong>Your data stays private.</strong> This tool runs entirely in your browser —
+          nothing you enter is sent to any server, collected, or shared. Saved presets are kept
+          only in this browser's local storage on your device; a shareable link encodes your inputs
+          only if you choose to copy and send one.
+        </p>
+        <p>
+          Engineering reference only. Thresholds from BioProcess International (Muralidharan, 2023)
+          and Hu &amp; Wiltberger (Industrial Cell Culture Scale-up); some equation forms
+          reconstructed from standard stirred-tank correlations. Validate against primary literature
+          and process data before GMP use.
+        </p>
       </footer>
     </>
   );
