@@ -60,6 +60,25 @@ bun run typecheck  # tsc --noEmit
 
 ---
 
+## 🔒 Privacy &amp; data
+
+**Your data stays private — nothing you enter ever leaves your device.**
+
+- The app is a **fully static, client-side** tool. Every calculation runs locally
+  in your browser; there is **no backend** and **no analytics or telemetry**.
+- **No inputs are transmitted, collected, stored remotely, or shared.** The only
+  network activity is the one-time download of the page's static files.
+- **Saved presets** live only in your own browser's `localStorage`, on your
+  device. They never leave it, and clearing your browser data removes them.
+- **Shareable links** encode your inputs into a URL **only when you click "Copy
+  shareable link."** The data sits in the URL fragment (`#…`), which browsers do
+  not send to servers, and it is shared solely if *you* choose to send the link.
+
+You can confirm all of this from the source — there are no `fetch`/network calls
+that send user data anywhere in [`src/`](src/).
+
+---
+
 ## Constraint reference
 
 The shear-proof window is the intersection of all of these (source: guidance PDF

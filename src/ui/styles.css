@@ -269,6 +269,15 @@ table.kv td {
   font-size: 0.76rem;
   line-height: 1.4;
 }
+.app-footer p {
+  margin: 0 0 8px;
+}
+.footer-privacy {
+  color: var(--text);
+}
+.footer-privacy strong {
+  color: var(--accent);
+}
 
 /* design-space plot */
 .design-svg {
